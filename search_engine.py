@@ -1,6 +1,5 @@
 import numpy as np
 import pickle
-from math import floor
 from os import listdir
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
@@ -22,17 +21,17 @@ class PorterTokenizer(object):
 
 # load saved info
 def load_list(path, filename):
-    l = []
+    mylist = []
     with open(path + filename, 'r') as f:
         for line in f:
             line = line.rstrip('\n')
-            l.append(line)
-    return l
+            mylist.append(line)
+    return mylist
 
 
 class SearchEngine:
 
-    def __int__(self, resources_path):
+    def __init__(self, resources_path):
         self.tfidf_matrix = load_npz(file=resources_path + 'tfidf_matrix.npz')
         with open(resources_path + 'tfidf_matrix_t', 'rb') as f:
             self.tfidf_matrix_t = np.load(f)
@@ -46,7 +45,7 @@ class SearchEngine:
                                                   stop_words='english',
                                                   tokenizer=PorterTokenizer(),
                                                   smooth_idf=True)
-        tfidf_search_matrix = tfidf_search_vectorizer.fit_transform(search_str)
+        tfidf_search_matrix = tfidf_search_vectorizer.fit_transform([search_str])
         sim_matrix = cosine_similarity(self.tfidf_matrix, tfidf_search_matrix)
         a = [i[0] for i in sorted(enumerate(list(sim_matrix[:, 0])),
                                   key=lambda x: x[1],
@@ -103,8 +102,7 @@ def save_list(path, filename, l):
 
 def save_info(path, tfidf_matrix, file_list, voc, lsa, tfidf_matrix_t):
     save_npz(file=path + 'tfidf_matrix', matrix=tfidf_matrix)
-    with open(path + 'tfidf_matrix_t', 'wb') as f:
-        np.save(f, tfidf_matrix_t)
+    np.save(path + 'tfidf_matrix_t', tfidf_matrix_t)
     save_list(path, 'voc', voc)
     save_list(path, 'file_list', file_list)
     with open('lsa.pickle', 'wb') as f:
@@ -112,8 +110,7 @@ def save_info(path, tfidf_matrix, file_list, voc, lsa, tfidf_matrix_t):
 
 
 class SearchIndexer:
-
-    def __int__(self, art_path):
+    def __init__(self, art_path):
         self.art_path = art_path
         self.file_list, self.doc_list = read_docs(self.art_path)
         self.tfidf_matrix, self.voc = tfidf_transform(self.doc_list)
