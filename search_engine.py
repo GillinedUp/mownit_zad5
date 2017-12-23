@@ -58,7 +58,7 @@ class SearchEngine:
                                                  stop_words='english',
                                                  tokenizer=PorterTokenizer(),
                                                  smooth_idf=True)
-        tfidf_query_matrix = tfidf_query_vectorizer.fit_transform(query_str)
+        tfidf_query_matrix = tfidf_query_vectorizer.fit_transform([query_str])
         query = self.lsa.transform(tfidf_query_matrix)
         sim_matrix = cosine_similarity(self.tfidf_matrix_t, query)
         a = [i[0] for i in sorted(enumerate(list(sim_matrix[:, 0])),
